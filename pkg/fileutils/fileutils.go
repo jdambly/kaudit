@@ -2,6 +2,7 @@ package fileutils
 
 import (
 	"fmt"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/afero"
 	"os"
 	"path/filepath"
@@ -28,6 +29,7 @@ func ListPodFiles(fs afero.Fs, podUID string) ([]string, error) {
 		if info.IsDir() && info.Name() == "pg_wal" {
 			return filepath.SkipDir
 		}
+		log.Debug().Str("path", path).Msg("found file")
 		return nil
 	})
 

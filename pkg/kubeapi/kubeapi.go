@@ -51,6 +51,7 @@ func GetPodUIDList(clientset kubernetes.Interface, namespace, labelSelector stri
 	}
 	var podUIDs []string
 	for _, pod := range pods.Items {
+		log.Debug().Msgf("Found pod %s with UID %s", pod.Name, pod.UID)
 		podUIDs = append(podUIDs, string(pod.UID))
 	}
 	return podUIDs, nil

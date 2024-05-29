@@ -16,6 +16,7 @@ func CreateAuditRule(runner CommandRunner, path string, podUID string, dryRun bo
 	rule := fmt.Sprintf("-a always,exit -w %s -F perm=wa -k file_deletion:%s", path, podUID)
 	cmdRule := fmt.Sprintf("%s %s\n", "auditctl", rule)
 	if dryRun {
+		log.Debug().Str("rule", cmdRule).Msg("Dry run")
 		return cmdRule, nil
 	}
 
