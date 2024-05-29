@@ -1,0 +1,70 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: auditctl-service-account
+  namespace: tpdata
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: pod-list-clusterrole
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["list", "get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: pod-list-clusterrole-binding
+subjects:
+  - kind: ServiceAccount
+    name: auditctl-service-account
+    namespace: tpdata
+roleRef:
+  kind: ClusterRole
+  name: pod-list-clusterrole
+  apiGroup: rbac.authorization.k8s.io
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: auditctl-pod
+spec:
+  serviceAccountName: auditctl-service-account
+  nodeSelector:
+    disk.netskope.io: local
+  containers:
+    - name: auditctl-container
+      image: artifactory.netskope.io/pe-docker/kaudit:v0.0.1
+      command: ["tail", "-f", "/dev/null"]
+      securityContext:
+        privileged: true
+      env:
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+      volumeMounts:
+        - name: var-log-audit
+          mountPath: /var/log/audit
+        - name: etc-audit
+          mountPath: /etc/audit
+        - name: etc-audisp
+          mountPath: /etc/audisp
+  volumes:
+    - name: var-log-audit
+      hostPath:
+        path: /var/log/audit
+        type: DirectoryOrCreate
+    - name: etc-audit
+      hostPath:
+        path: /etc/audit
+        type: DirectoryOrCreate
+    - name: etc-audisp
+      hostPath:
+        path: /etc/audisp
+        type: DirectoryOrCreate
+  hostPID: true
+  restartPolicy: Never

@@ -28,12 +28,6 @@ func Cmd() *cobra.Command {
 
 // runAdd do all the work for the cmd
 func runAdd(s *settings.Settings) error {
-	// check for the auditd socket before doing anything
-	if !s.DryRun {
-		if err := audit.Validate(); err != nil {
-			return err
-		}
-	}
 	// creat the k8s client
 	k8sClient, err := kubeapi.NewKubeClient()
 	if err != nil {
