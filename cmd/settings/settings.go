@@ -17,6 +17,7 @@ type Settings struct {
 	Namespace     string `env:"NAMESPACE"`
 	LabelSelector string `env:"LABEL_SELECTOR"`
 	DryRun        bool   `env:"DRY_RUN, default=false"`
+	NodeName      string `env:"NODE_NAME"`
 }
 
 // GetEnv get the environment variables
@@ -40,6 +41,8 @@ func (s *Settings) PersistentFlags(cmd *cobra.Command) {
 		"Set the label selector")
 	cmd.PersistentFlags().BoolVarP(&s.DryRun, "dry-run", "d", s.DryRun,
 		"Run the command in dry-run mode")
+	cmd.PersistentFlags().StringVarP(&s.NodeName, "node-name", "n", s.NodeName,
+		"Set the node name")
 
 }
 

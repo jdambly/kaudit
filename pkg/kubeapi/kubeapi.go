@@ -39,10 +39,14 @@ func NewKubeClient() (*kubernetes.Clientset, error) {
 }
 
 // GetPodUIDList takes a clientset and returns a list of UIDs for pods based on a label selector and namespace
-func GetPodUIDList(clientset kubernetes.Interface, namespace, labelSelector string) ([]string, error) {
-	pods, err := clientset.CoreV1().Pods(namespace).List(context.Background(), metav1.ListOptions{LabelSelector: labelSelector})
+func GetPodUIDList(clientset kubernetes.Interface, namespace, labelSelector string, nodeName string) ([]string, error) {
+	listOptions := metav1.ListOptions{
+		LabelSelector: labelSelector,
+		FieldSelector: "spec.nodeName=" + nodeName,
+	}
+	pods, err := clientset.CoreV1().Pods(namespace).List(context.Background(), listOptions)
 	if err != nil {
-		log.Error().Err(err).Msgf("Failed to list pods in namespace %s with label selector %s", namespace, labelSelector)
+		log.Error().Err(err).Msgf("Failed to list pods in namespace %s with label selector %s on node %s", namespace, labelSelector, nodeName)
 		return nil, err
 	}
 	var podUIDs []string

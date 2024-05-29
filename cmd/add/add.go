@@ -40,7 +40,7 @@ func runAdd(s *settings.Settings) error {
 		return err
 	}
 	// get the list of pod UIDs based on the label selector and namespace
-	UIDList, err := kubeapi.GetPodUIDList(k8sClient, s.Namespace, s.LabelSelector)
+	UIDList, err := kubeapi.GetPodUIDList(k8sClient, s.Namespace, s.LabelSelector, s.NodeName)
 	if err != nil {
 		return err
 	}

@@ -20,6 +20,9 @@ func TestGetPodUIDList_HappyPath(t *testing.T) {
 				"test-label": "test-value",
 			},
 		},
+		Spec: v1.PodSpec{
+			NodeName: "test-node",
+		},
 	}, metav1.CreateOptions{})
 	_, _ = clientset.CoreV1().Pods(namespace).Create(context.Background(), &v1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
@@ -29,9 +32,12 @@ func TestGetPodUIDList_HappyPath(t *testing.T) {
 				"test-label": "test-value",
 			},
 		},
+		Spec: v1.PodSpec{
+			NodeName: "test-node",
+		},
 	}, metav1.CreateOptions{})
 
-	uids, err := GetPodUIDList(clientset, namespace, "test-label=test-value")
+	uids, err := GetPodUIDList(clientset, namespace, "test-label=test-value", "test-node")
 
 	assert.NoError(t, err)
 	assert.ElementsMatch(t, []string{"test-uid-1", "test-uid-2"}, uids)
@@ -41,7 +47,7 @@ func TestGetPodUIDList_NoMatchingPods(t *testing.T) {
 	clientset := fake.NewSimpleClientset()
 	namespace := "test-namespace"
 
-	uids, err := GetPodUIDList(clientset, namespace, "non-existent-label=non-existent-value")
+	uids, err := GetPodUIDList(clientset, namespace, "non-existent-label=non-existent-value", "test-node")
 
 	assert.NoError(t, err)
 	assert.Empty(t, uids)
