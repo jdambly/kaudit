@@ -25,6 +25,7 @@ func ListPodFiles(fs afero.Fs, podUID string) ([]string, error) {
 		if info.IsDir() && info.Name() == "pgdata" {
 			return filepath.SkipDir
 		}
+
 		// filter out paths that have pg_wal in them
 		if info.IsDir() && info.Name() == "pg_wal" {
 			return filepath.SkipDir
