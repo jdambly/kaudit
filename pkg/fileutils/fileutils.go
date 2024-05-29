@@ -22,7 +22,7 @@ func ListPodFiles(fs afero.Fs, podUID string) ([]string, error) {
 			files = append(files, path)
 		}
 		// filter out paths that have pg_data in them
-		if info.IsDir() && info.Name() == "pg_data" {
+		if info.IsDir() && info.Name() == "pgdata" {
 			return filepath.SkipDir
 		}
 		// filter out paths that have pg_wal in them

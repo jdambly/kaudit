@@ -53,6 +53,8 @@ spec:
           mountPath: /etc/audit
         - name: etc-audisp
           mountPath: /etc/audisp
+        - name: kubelet
+          mountPath: /var/lib/kubelet
   volumes:
     - name: var-log-audit
       hostPath:
@@ -66,5 +68,9 @@ spec:
       hostPath:
         path: /etc/audisp
         type: DirectoryOrCreate
+    - name: kubelet
+      hostPath:
+          path: /var/lib/kubelet
+          type: Directory
   hostPID: true
   restartPolicy: Never
