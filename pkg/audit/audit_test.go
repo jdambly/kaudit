@@ -21,7 +21,7 @@ func mockRunner(output string, err error) CommandRunner {
 
 func TestCreateAuditRule(t *testing.T) {
 	t.Run("dry run", func(t *testing.T) {
-		expected := "auditctl -a always,exit -F dir=/tmp/testpath -F perm=wa -k file_deletion:pod-UID\n"
+		expected := "-a always,exit -F dir=/tmp/testpath -F perm=wa -k file_deletion:pod-UID"
 		result, err := CreateAuditRule(DefaultRunner, "/tmp/testpath", "pod-UID", true)
 		require.NoError(t, err)
 		assert.Equal(t, expected, result)
@@ -31,7 +31,7 @@ func TestCreateAuditRule(t *testing.T) {
 		mockOutput := "mocked command"
 		runner := mockRunner(mockOutput, nil)
 
-		expected := "auditctl -a always,exit -F dir=/tmp/testpath -F perm=wa -k file_deletion:pod-UID\n"
+		expected := "-a always,exit -F dir=/tmp/testpath -F perm=wa -k file_deletion:pod-UID"
 		result, err := CreateAuditRule(runner, "/tmp/testpath", "pod-UID", false)
 		require.NoError(t, err)
 		assert.Equal(t, expected, result)

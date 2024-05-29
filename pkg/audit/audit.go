@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/rs/zerolog/log"
 	"os/exec"
+	"strings"
 )
 
 // CommandRunner is a type for functions that run commands
@@ -13,18 +14,18 @@ var DefaultRunner CommandRunner = exec.Command
 
 // CreateAuditRule creates an audit rule for a given path
 func CreateAuditRule(runner CommandRunner, path string, podUID string, dryRun bool) (string, error) {
-	rule := fmt.Sprintf("-a always,exit -F dir=%s -F perm=wa -k file_deletion:%s", path, podUID)
-	cmdRule := fmt.Sprintf("%s %s\n", "auditctl", rule)
+	cmdSlice := []string{"-a", "always,exit", "-F", fmt.Sprintf("dir=%s", path), "-F", "perm=wa", "-k", fmt.Sprintf("file_deletion:%s", podUID)}
 	if dryRun {
-		log.Debug().Str("rule", cmdRule).Msg("Dry run")
-		return cmdRule, nil
+		log.Debug().Str("rule", strings.Join(cmdSlice, " ")).Msg("Dry run")
+		return strings.Join(cmdSlice, " "), nil
 	}
+	// note to self cmd needs to take a slice as each element is a separate argument
+	cmd := runner("auditctl", cmdSlice...)
 
-	cmd := runner("auditctl", rule)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return "", fmt.Errorf("error creating audit rule: %v\n%s", err, output)
 	}
 	log.Info().Str("path", path).Msg("Created audit rule")
-	return cmdRule, nil
+	return strings.Join(cmdSlice, " "), nil
 }

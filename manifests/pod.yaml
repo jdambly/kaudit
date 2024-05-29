@@ -37,7 +37,7 @@ spec:
     disk.netskope.io: local
   containers:
     - name: auditctl-container
-      image: artifactory.netskope.io/pe-docker/kaudit:v0.0.3
+      image: artifactory.netskope.io/pe-docker/kaudit:v0.0.4
       command: ["tail", "-f", "/dev/null"]
       securityContext:
         privileged: true
