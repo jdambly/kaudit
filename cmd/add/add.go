@@ -33,15 +33,15 @@ func runAdd(s *settings.Settings) error {
 	if err != nil {
 		return err
 	}
-	// get the list of pod UIDs based on the label selector and namespace
-	UIDList, err := kubeapi.GetPodUIDList(k8sClient, s.Namespace, s.LabelSelector, s.NodeName)
+
+	UIDList, err := kubeapi.GetPodUIDList(k8sClient, s.Namespace, s.ListOpts())
 	if err != nil {
 		return err
 	}
 	var rules []string
 	fs := afero.NewOsFs()
 	for _, podUID := range UIDList {
-		files, err := fileutils.ListPodFiles(fs, podUID)
+		files, err := fileutils.ListPodFiles(fs, podUID, s.Regex)
 		if err != nil {
 			return err
 		}

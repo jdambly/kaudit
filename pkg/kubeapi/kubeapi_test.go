@@ -17,7 +17,8 @@ func TestGetPodUIDList_HappyPath(t *testing.T) {
 			Name: "test-pod-1",
 			UID:  "test-uid-1",
 			Labels: map[string]string{
-				"test-label": "test-value",
+				"test-label":  "test-value",
+				"extra-label": "extra-value",
 			},
 		},
 		Spec: v1.PodSpec{
@@ -29,15 +30,19 @@ func TestGetPodUIDList_HappyPath(t *testing.T) {
 			Name: "test-pod-2",
 			UID:  "test-uid-2",
 			Labels: map[string]string{
-				"test-label": "test-value",
+				"test-label":  "test-value",
+				"extra-label": "extra-value",
 			},
 		},
 		Spec: v1.PodSpec{
 			NodeName: "test-node",
 		},
 	}, metav1.CreateOptions{})
-
-	uids, err := GetPodUIDList(clientset, namespace, "test-label=test-value", "test-node")
+	listOpts := metav1.ListOptions{
+		LabelSelector: "test-label=test-value,extra-label=extra-value",
+		FieldSelector: "spec.nodeName=test-node",
+	}
+	uids, err := GetPodUIDList(clientset, namespace, listOpts)
 
 	assert.NoError(t, err)
 	assert.ElementsMatch(t, []string{"test-uid-1", "test-uid-2"}, uids)
@@ -46,8 +51,12 @@ func TestGetPodUIDList_HappyPath(t *testing.T) {
 func TestGetPodUIDList_NoMatchingPods(t *testing.T) {
 	clientset := fake.NewSimpleClientset()
 	namespace := "test-namespace"
+	listOpts := metav1.ListOptions{
+		LabelSelector: "test-label=test-value",
+		FieldSelector: "spec.nodeName=test-node",
+	}
 
-	uids, err := GetPodUIDList(clientset, namespace, "non-existent-label=non-existent-value", "test-node")
+	uids, err := GetPodUIDList(clientset, namespace, listOpts)
 
 	assert.NoError(t, err)
 	assert.Empty(t, uids)

@@ -6,35 +6,72 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestParseLabelSelector_HappyPath(t *testing.T) {
-	s := &Settings{}
-	selector := "key1=value1,key2=value2"
-	expected := map[string]string{
-		"key1": "value1",
-		"key2": "value2",
+func TestListOpts_HappyPath(t *testing.T) {
+	s := &Settings{
+		NodeName:      "test-node",
+		Namespace:     "test-namespace",
+		LabelSelector: "test-label=test-value,extra-label=extra-value",
 	}
-
-	labels, err := s.ParseLabelSelector(selector)
-
-	assert.NoError(t, err, "Unexpected error")
-	assert.Equal(t, expected, labels, "The labels do not match the expected labels")
+	listOpts := s.ListOpts()
+	assert.Equal(t, "test-label=test-value,extra-label=extra-value", listOpts.LabelSelector)
+	assert.Equal(t, "spec.nodeName=test-node", listOpts.FieldSelector)
 }
 
-func TestParseLabelSelector_EmptyString(t *testing.T) {
-	s := &Settings{}
-	selector := ""
-	expected := map[string]string{}
-	labels, err := s.ParseLabelSelector(selector)
-
-	assert.Error(t, err, "label selector is empty")
-	assert.Equal(t, expected, labels, "The labels do not match the expected labels")
+func TestListOpts_Empty(t *testing.T) {
+	s := &Settings{
+		NodeName:      "",
+		Namespace:     "",
+		LabelSelector: "",
+	}
+	listOpts := s.ListOpts()
+	assert.Equal(t, "", listOpts.LabelSelector)
+	assert.Equal(t, "spec.nodeName=", listOpts.FieldSelector)
 }
 
-func TestParseLabelSelector_InvalidFormat(t *testing.T) {
-	s := &Settings{}
-	selector := "key1=value1,key2"
+func TestListOpts_BadLabelSelector(t *testing.T) {
+	s := &Settings{
+		NodeName:      "test-node",
+		Namespace:     "test-namespace",
+		LabelSelector: "test-label=key,bad-label",
+	}
+	listOpts := s.ListOpts()
+	assert.Equal(t, "test-label=key,bad-label", listOpts.LabelSelector)
+	assert.Equal(t, "spec.nodeName=test-node", listOpts.FieldSelector)
+}
 
-	_, err := s.ParseLabelSelector(selector)
+func TestParseInclude_HappyPath(t *testing.T) {
+	s := &Settings{
+		Include: "test1,test2,test3",
+	}
+	result, err := s.ParseInclude()
+	assert.NoError(t, err)
+	assert.ElementsMatch(t, []string{"test1", "test2", "test3"}, result)
+}
 
-	assert.NoError(t, err, "Expected error")
+func TestParseInclude_Empty(t *testing.T) {
+	s := &Settings{
+		Include: "",
+	}
+	result, err := s.ParseInclude()
+	assert.Error(t, err)
+	assert.ElementsMatch(t, []string{""}, result)
+
+}
+
+func TestParseExclude_HappyPath(t *testing.T) {
+	s := &Settings{
+		Exclude: "test1,test2,test3",
+	}
+	result, err := s.ParseExclude()
+	assert.NoError(t, err)
+	assert.ElementsMatch(t, []string{"test1", "test2", "test3"}, result)
+}
+
+func TestParseExclude_Empty(t *testing.T) {
+	s := &Settings{
+		Exclude: "",
+	}
+	result, err := s.ParseExclude()
+	assert.Error(t, err)
+	assert.ElementsMatch(t, []string{""}, result)
 }

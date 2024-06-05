@@ -2,37 +2,32 @@ package fileutils
 
 import (
 	"fmt"
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/afero"
 	"os"
-	"path/filepath"
+	"regexp"
 )
 
 // ListPodFiles returns a list of files in the pod's volume directory
-func ListPodFiles(fs afero.Fs, podUID string) ([]string, error) {
+func ListPodFiles(fs afero.Fs, podUID, myRegex string) ([]string, error) {
 	basePath := fmt.Sprintf("/var/lib/kubelet/pods/%s/volumes/", podUID)
 	var files []string
-
-	err := afero.Walk(fs, basePath, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		// filter out directories
-		if !info.IsDir() {
-			files = append(files, path)
-		}
-		// filter out paths that have pg_data in them
-		if info.IsDir() && info.Name() == "pgdata" {
-			return filepath.SkipDir
-		}
-
-		// filter out paths that have pg_wal in them
-		if info.IsDir() && info.Name() == "pg_wal" {
-			return filepath.SkipDir
-		}
-		log.Debug().Str("path", path).Msg("found file")
-		return nil
-	})
+	r := regexp.MustCompile(myRegex)
+	err := afero.Walk(fs, basePath,
+		func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+			if info == nil {
+				return nil
+			}
+			if info.IsDir() {
+				return nil
+			}
+			if r.MatchString(info.Name()) {
+				files = append(files, path)
+			}
+			return nil
+		})
 
 	if err != nil {
 		return nil, err
