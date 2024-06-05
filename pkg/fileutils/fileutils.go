@@ -23,7 +23,7 @@ func ListPodFiles(fs afero.Fs, podUID, myRegex string) ([]string, error) {
 			if info.IsDir() {
 				return nil
 			}
-			if r.MatchString(info.Name()) {
+			if r.MatchString(path) {
 				files = append(files, path)
 			}
 			return nil

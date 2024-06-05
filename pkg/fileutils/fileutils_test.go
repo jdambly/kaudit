@@ -98,11 +98,10 @@ func TestListPodFiles_WithOR(t *testing.T) {
 		require.NoError(t, err, "Failed to create file")
 	}
 
-	files, err := ListPodFiles(fs, podUID, "pg_data|pg_wal")
+	files, err := ListPodFiles(fs, podUID, `data|wal`)
 	require.NoError(t, err, "listPodFiles returned an error")
 
 	expectedFiles := []string{
-		filepath.Join(volumesDir, "fakeDir/file4.txt"),
 		filepath.Join(volumesDir, "pg_data/file5.yaml"),
 		filepath.Join(volumesDir, "pg_wal/file6.tgz"),
 	}
